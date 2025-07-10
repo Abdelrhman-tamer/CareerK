@@ -1,0 +1,36 @@
+{
+    "track": "backend-development",
+    "courses": [
+      {
+        "title": "Node.js for Beginners",
+        "slug": "nodejs-for-beginners",
+        "description": "Learn Node.js from scratch and build your first backend API.",
+        "level": "Beginner"
+      },
+      {
+        "title": "Express.js Crash Course",
+        "slug": "expressjs-course",
+        "description": "Quickly build backend APIs with Express.js.",
+        "level": "Intermediate"
+      },
+      {
+        "title": "PostgreSQL Full Course",
+        "slug": "postgresql-course",
+        "description": "Master SQL with PostgreSQL and learn how to connect with backend apps.",
+        "level": "Intermediate"
+      },
+      {
+        "title": "JWT Authentication in Node.js",
+        "slug": "jwt-auth-nodejs",
+        "description": "Implement authentication with JSON Web Tokens.",
+        "level": "Intermediate"
+      },
+      {
+        "title": "Docker for Node.js Apps",
+        "slug": "docker-nodejs",
+        "description": "Learn to containerize backend apps and prepare them for production.",
+        "level": "Advanced"
+      }
+    ]
+  }
+  

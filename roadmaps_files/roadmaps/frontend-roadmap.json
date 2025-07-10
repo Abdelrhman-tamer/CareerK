@@ -1,0 +1,22 @@
+{
+    "slug": "frontend-roadmap",
+    "title": "Frontend Developer Roadmap",
+    "track": "web-development",
+    "type": "standard",
+    "difficulty": "intermediate",
+    "steps": [
+      {
+        "id": "html-css",
+        "title": "Learn HTML & CSS",
+        "description": "Basics of building web pages.",
+        "courses": ["html-foundations", "css-basics"]
+      },
+      {
+        "id": "javascript",
+        "title": "JavaScript Fundamentals",
+        "description": "Core language concepts.",
+        "courses": ["javascript-basics"]
+      }
+    ]
+  }
+  

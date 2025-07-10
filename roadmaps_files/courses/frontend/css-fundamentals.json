@@ -1,0 +1,10 @@
+{
+    "id": 2,
+    "track_id": 1,
+    "title": "CSS Fundamentals",
+    "slug": "css-fundamentals",
+    "level": "Beginner",
+    "duration": "3 hours",
+    "cover_image": "/images/css.png",
+    "video_url": "https://www.youtube.com/watch?v=1Rs2ND1ryYc"
+  }

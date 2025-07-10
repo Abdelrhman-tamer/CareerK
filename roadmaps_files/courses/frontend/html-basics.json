@@ -1,0 +1,44 @@
+[
+    {
+      "id": 1,
+      "track_id": 1,
+      "title": "HTML Basics",
+      "slug": "html-basics",
+      "level": "Beginner",
+      "duration": "2 hours",
+      "cover_image": "/images/html.png",
+      "video_url": "https://www.youtube.com/watch?v=UB1O30fR-EE"
+    },
+    
+    {
+      "id": 3,
+      "track_id": 1,
+      "title": "JavaScript Essentials",
+      "slug": "javascript-essentials",
+      "level": "Beginner",
+      "duration": "4 hours",
+      "cover_image": "/images/js.png",
+      "video_url": "https://www.youtube.com/watch?v=W6NZfCO5SIk"
+    },
+    {
+      "id": 4,
+      "track_id": 1,
+      "title": "Responsive Web Design",
+      "slug": "responsive-web-design",
+      "level": "Intermediate",
+      "duration": "2.5 hours",
+      "cover_image": "/images/responsive.png",
+      "video_url": "https://www.youtube.com/watch?v=srvUrASNj0s"
+    },
+    {
+      "id": 5,
+      "track_id": 1,
+      "title": "React for Beginners",
+      "slug": "react-for-beginners",
+      "level": "Intermediate",
+      "duration": "5 hours",
+      "cover_image": "/images/react.png",
+      "video_url": "https://www.youtube.com/watch?v=bMknfKXIFA8"
+    }
+  ]
+  

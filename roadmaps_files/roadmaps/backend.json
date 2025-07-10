@@ -1,0 +1,42 @@
+{
+    "track": "backend-development",
+    "title": "Backend Development Roadmap",
+    "steps": [
+      {
+        "title": "Learn a Programming Language",
+        "slug": "programming-language",
+        "description": "Start with a backend-friendly language like JavaScript (Node.js), Python, Java, or Go."
+      },
+      {
+        "title": "Understand HTTP & APIs",
+        "slug": "http-and-apis",
+        "description": "Learn how HTTP works, status codes, headers, and building REST APIs."
+      },
+      {
+        "title": "Databases",
+        "slug": "databases",
+        "description": "Learn SQL (PostgreSQL or MySQL) and NoSQL (MongoDB) databases."
+      },
+      {
+        "title": "Authentication & Authorization",
+        "slug": "auth",
+        "description": "Understand user authentication, JWT, OAuth, sessions."
+      },
+      {
+        "title": "Server-Side Frameworks",
+        "slug": "frameworks",
+        "description": "Work with backend frameworks like Express.js, Django, Flask, or Spring Boot."
+      },
+      {
+        "title": "Testing & Debugging",
+        "slug": "testing-debugging",
+        "description": "Learn how to write tests, debug and log backend applications."
+      },
+      {
+        "title": "Deploy Your App",
+        "slug": "deployment",
+        "description": "Deploy backend applications using services like Render, Heroku, or VPS with Docker."
+      }
+    ]
+  }
+  

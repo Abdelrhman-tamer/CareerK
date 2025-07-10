@@ -1,0 +1,23 @@
+{
+    "track": "frontend",
+    "title": "Frontend Track Courses",
+    "courses": [
+      {
+        "slug": "html-basics",
+        "title": "HTML Basics"
+      },
+      {
+        "slug": "css-fundamentals",
+        "title": "CSS Fundamentals"
+      },
+      {
+        "slug": "javascript-basics",
+        "title": "JavaScript Basics"
+      },
+      {
+        "slug": "react-fundamentals",
+        "title": "React Fundamentals"
+      }
+    ]
+  }
+  

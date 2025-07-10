@@ -1,0 +1,10 @@
+{
+    "id": "web-dev",
+    "name": "Web Development",
+    "slug": "web-development",
+    "description": "A complete guide to becoming a web developer.",
+    "industry": "Technology",
+    "is_featured": true,
+    "roadmaps": ["frontend-roadmap", "backend-roadmap"]
+  }
+  

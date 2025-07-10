@@ -1,0 +1,38 @@
+[
+    {
+      "track_id": 1,
+      "steps": [
+        {
+          "order": 1,
+          "title": "Learn HTML",
+          "resource_link": "https://developer.mozilla.org/en-US/docs/Web/HTML"
+        },
+        {
+          "order": 2,
+          "title": "Learn CSS",
+          "resource_link": "https://developer.mozilla.org/en-US/docs/Web/CSS"
+        },
+        {
+          "order": 3,
+          "title": "Learn JavaScript",
+          "resource_link": "https://developer.mozilla.org/en-US/docs/Web/JavaScript"
+        },
+        {
+          "order": 4,
+          "title": "Learn Git & GitHub",
+          "resource_link": "https://www.freecodecamp.org/news/learn-the-basics-of-git-in-under-10-minutes/"
+        },
+        {
+          "order": 5,
+          "title": "Learn Responsive Design",
+          "resource_link": "https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Responsive_Design"
+        },
+        {
+          "order": 6,
+          "title": "Learn a Framework (React)",
+          "resource_link": "https://reactjs.org/"
+        }
+      ]
+    }
+  ]
+  
