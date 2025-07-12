@@ -8,13 +8,15 @@ function getFullImageUrl(relativePath, folder = "") {
     // If already a full URL, return it unchanged
     if (relativePath.startsWith("http")) return relativePath;
 
-    // Normalize path and add folder if provided
-    const cleanPath = relativePath.replace(/^\/+/, "");
-    const fullPath = folder
-        ? `${folder.replace(/\/+$/, "")}/${cleanPath}`
-        : cleanPath;
+    // Normalize path
+    let cleanPath = relativePath.replace(/^\/+/, "");
 
-    return `${BASE_URL}/${fullPath}`;
+    // Avoid duplicating folder if already included
+    if (folder && !cleanPath.startsWith(folder)) {
+        cleanPath = `${folder.replace(/\/+$/, "")}/${cleanPath}`;
+    }
+
+    return `${BASE_URL}/${cleanPath}`;
 }
 
 function formatDuration(minutes) {

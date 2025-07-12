@@ -98,5 +98,7 @@ app.use("/api/cv", require("./routes/cvFetch-download"));
 
 app.use("/api/chatbot", require("./routes/chatbotRoutes"));
 
+app.use("/api/ai_skills", require("./routes/ai_skills_dev"));
+
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
