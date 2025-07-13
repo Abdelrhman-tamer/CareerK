@@ -1,15 +1,36 @@
-const express = require('express'); 
+const express = require("express");
 const router = express.Router();
-const { authenticateUser, authorize } = require('../../middleware/authMiddleware');
-const companyHomeController = require('../../controllers/Homepages/company');
+const {
+    authenticateUser,
+    authorize,
+} = require("../../middleware/authMiddleware");
+const companyHomeController = require("../../controllers/Homepages/company");
 
 // ✅ GET company homepage (title, industry, available & recent developers)
-router.get('/homepage', authenticateUser, companyHomeController.getCompanyHomepage);
+router.get(
+    "/homepage",
+    authenticateUser,
+    companyHomeController.getCompanyHomepage
+);
 
 // ✅ GET uploaded and generated CV for a developer
-router.get('/:developerId/cv', authenticateUser, companyHomeController.getDeveloperCvController);
+router.get(
+    "/:developerId/cv",
+    authenticateUser,
+    companyHomeController.getDeveloperCvController
+);
 
 // ✅ GET detailed job application info for a specific application
-router.get('/application/:applicationId', authenticateUser, companyHomeController.getApplicationDetailsController);
+router.get(
+    "/application/:applicationId",
+    authenticateUser,
+    companyHomeController.getApplicationDetailsController
+);
+
+router.get(
+    "/:id/details",
+    authenticateUser,
+    companyHomeController.getDeveloperDetails
+);
 
 module.exports = router;

@@ -68,6 +68,16 @@ exports.getGroupsByTag = async (req, res) => {
     }
 };
 
+exports.getAllTags = async (req, res) => {
+    try {
+        const tags = await communityService.getAllInterestTags();
+        res.status(200).json(tags);
+    } catch (error) {
+        console.error("Error fetching interest tags:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
 // ✅ Search community groups
 exports.searchGroups = async (req, res) => {
     const { q } = req.query;
@@ -258,7 +268,7 @@ exports.getGroupMessages = async (req, res) => {
     try {
         const { groupId } = req.params;
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 20;
+        const limit = parseInt(req.query.limit) || 5000;
 
         const messages = await communityService.getGroupMessages(
             groupId,

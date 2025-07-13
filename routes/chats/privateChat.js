@@ -31,7 +31,11 @@ router.get(
 );
 
 // ✅ Get receiver info from a private chat
-router.get("/:chatRoomId/receiver", private_chat.getReceiverInfoController);
+router.get(
+    "/:chatRoomId/receiver",
+    authenticateUser,
+    private_chat.getReceiverInfoController
+);
 
 // ✅ Send a message in a private chat room (text or file)
 router.post(

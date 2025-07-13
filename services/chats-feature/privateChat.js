@@ -199,16 +199,28 @@ const sendMessage = async ({
 const getReceiverInfo = async (chatRoomId, senderId, senderRole) => {
     const result = await pool.query(
         `SELECT user_id, user_role
-         FROM chat_participants
-         WHERE chat_room_id = $1 AND NOT (user_id = $2 AND user_role = $3)
-         LIMIT 1`,
+     FROM chat_participants
+     WHERE chat_room_id = $1 AND NOT (user_id = $2 AND user_role = $3)
+     LIMIT 1`,
         [chatRoomId, senderId, senderRole]
     );
 
-    if (result.rows.length === 0) return null;
+    if (result.rows.length === 0) {
+        console.warn("No receiver found for chatRoomId:", chatRoomId);
+        return null;
+    }
 
     const { user_id, user_role } = result.rows[0];
     const receiverData = await getUserDetails(user_id, user_role);
+
+    if (!receiverData) {
+        console.warn(
+            "User details not found for receiver:",
+            user_id,
+            user_role
+        );
+        return null;
+    }
 
     let currentTrack = "";
     let phoneNumber = "";
@@ -231,11 +243,50 @@ const getReceiverInfo = async (chatRoomId, senderId, senderRole) => {
     return {
         receiverId: user_id,
         receiverRole: user_role,
-        receiverName: receiverData?.full_name || "",
-        receiverProfilePicture: receiverData?.profile_picture || "",
+        receiverName: receiverData.full_name,
+        receiverProfilePicture: receiverData.profile_picture,
         receiverTrack: currentTrack,
         receiverPhoneNumber: phoneNumber,
     };
+    // const result = await pool.query(
+    //     `SELECT user_id, user_role
+    //      FROM chat_participants
+    //      WHERE chat_room_id = $1 AND NOT (user_id = $2 AND user_role = $3)
+    //      LIMIT 1`,
+    //     [chatRoomId, senderId, senderRole]
+    // );
+
+    // if (result.rows.length === 0) return null;
+
+    // const { user_id, user_role } = result.rows[0];
+    // const receiverData = await getUserDetails(user_id, user_role);
+
+    // let currentTrack = "";
+    // let phoneNumber = "";
+
+    // if (user_role === "developer") {
+    //     const devRes = await pool.query(
+    //         `SELECT current_track, phone_number FROM developers WHERE id = $1`,
+    //         [user_id]
+    //     );
+    //     currentTrack = devRes.rows[0]?.current_track || "";
+    //     phoneNumber = devRes.rows[0]?.phone_number || "";
+    // } else {
+    //     const res = await pool.query(
+    //         `SELECT phone_number FROM ${user_role}s WHERE id = $1`,
+    //         [user_id]
+    //     );
+    //     phoneNumber = res.rows[0]?.phone_number || "";
+    // }
+
+    // return {
+    //     receiverId: user_id,
+    //     receiverRole: user_role,
+    //     receiverName: receiverData?.full_name || "",
+    //     receiverProfilePicture: receiverData?.profile_picture || "",
+    //     receiverTrack: currentTrack,
+    //     receiverPhoneNumber: phoneNumber,
+    // };
 };
 
 // 🔹 Get all messages
@@ -266,7 +317,8 @@ const getMessages = async (chatRoomId, limit = 5000, offset = 0) => {
 // 🔹 Get chat list for user
 const getMyChats = async (userId, role) => {
     const result = await pool.query(
-        `SELECT 
+        `
+        SELECT 
             cr.id AS chat_room_id,
             m.message AS last_message,
             m.created_at AS last_message_time,
@@ -282,14 +334,17 @@ const getMyChats = async (userId, role) => {
         LEFT JOIN LATERAL (
             SELECT sender_id, sender_role, message, created_at
             FROM chat_messages 
-            WHERE chat_room_id = cr.id AND deleted_at IS NULL
+            WHERE chat_room_id = cr.id 
+              AND deleted_at IS NULL
+              AND NOT (sender_id = p.user_id AND sender_role = p.user_role)  -- Only received messages
             ORDER BY created_at DESC
             LIMIT 1
         ) m ON true
         WHERE p.user_id = $1 
           AND p.user_role = $2
           AND cr.type = 'private'
-        ORDER BY p.updated_at DESC NULLS LAST`,
+        ORDER BY m.created_at DESC NULLS LAST
+        `,
         [userId, role]
     );
 
@@ -328,37 +383,61 @@ const getMyChats = async (userId, role) => {
 
 // const getMyChats = async (userId, role) => {
 //     const result = await pool.query(
-//         `SELECT cr.id AS chat_room_id, m.message AS last_message, m.created_at AS last_message_time,
-//                 p2.user_id AS other_user_id, p2.user_role AS other_user_role
-//          FROM chat_participants p
-//          JOIN chat_rooms cr ON cr.id = p.chat_room_id
-//          JOIN chat_participants p2
-//            ON cr.id = p2.chat_room_id
-//           AND NOT (p2.user_id = p.user_id AND p2.user_role = p.user_role)
-//          LEFT JOIN LATERAL (
-//              SELECT message, created_at FROM chat_messages
-//              WHERE chat_room_id = cr.id AND deleted_at IS NULL
-//              ORDER BY created_at DESC LIMIT 1
-//          ) m ON true
-//          WHERE p.user_id = $1 AND p.user_role = $2 AND cr.type = 'private'
-//          ORDER BY p.updated_at DESC NULLS LAST`,
+//         `SELECT
+//             cr.id AS chat_room_id,
+//             m.message AS last_message,
+//             m.created_at AS last_message_time,
+//             m.sender_id AS last_message_sender_id,
+//             m.sender_role AS last_message_sender_role,
+//             p2.user_id AS other_user_id,
+//             p2.user_role AS other_user_role
+//         FROM chat_participants p
+//         JOIN chat_rooms cr ON cr.id = p.chat_room_id
+//         JOIN chat_participants p2
+//             ON cr.id = p2.chat_room_id
+//             AND NOT (p2.user_id = p.user_id AND p2.user_role = p.user_role)
+//         LEFT JOIN LATERAL (
+//             SELECT sender_id, sender_role, message, created_at
+//             FROM chat_messages
+//             WHERE chat_room_id = cr.id AND deleted_at IS NULL
+//             ORDER BY created_at DESC
+//             LIMIT 1
+//         ) m ON true
+//         WHERE p.user_id = $1
+//           AND p.user_role = $2
+//           AND cr.type = 'private'
+//         ORDER BY p.updated_at DESC NULLS LAST`,
 //         [userId, role]
 //     );
 
 //     return await Promise.all(
 //         result.rows.map(async (chat) => {
-//             const user = await getUserDetails(
+//             const otherUser = await getUserDetails(
 //                 chat.other_user_id,
 //                 chat.other_user_role
 //             );
+
+//             let lastMessageSenderName = "";
+//             if (chat.last_message_sender_id && chat.last_message_sender_role) {
+//                 const sender = await getUserDetails(
+//                     chat.last_message_sender_id,
+//                     chat.last_message_sender_role
+//                 );
+//                 lastMessageSenderName = sender?.full_name || "";
+//             }
+
 //             return {
 //                 chat_room_id: chat.chat_room_id,
 //                 last_message: chat.last_message,
 //                 last_message_time: chat.last_message_time,
+//                 last_message_sender_id: chat.last_message_sender_id,
+//                 last_message_sender_role: chat.last_message_sender_role,
+//                 last_message_sender_name: lastMessageSenderName,
+
 //                 other_user_id: chat.other_user_id,
 //                 other_user_role: chat.other_user_role,
-//                 user_name: user?.full_name || "",
-//                 user_profile_picture: user?.profile_picture || "",
+//                 user_name: otherUser?.full_name || "",
+//                 user_profile_picture: otherUser?.profile_picture || "",
 //             };
 //         })
 //     );

@@ -49,6 +49,73 @@ async function getAvailableDevelopers() {
     }));
 }
 
+async function getDeveloperById(developerId) {
+    const query = `
+        SELECT 
+            d.id,
+            d.first_name,
+            d.last_name,
+            d.email,
+            d.bio,
+            d.current_track,
+            d.track_level,
+            d.profile_picture,
+            d.address,
+            d.city,
+            d.country,
+            d.brief_bio,
+            (
+                SELECT ja.uploaded_cv
+                FROM job_applications ja
+                WHERE ja.developer_id = d.id
+                ORDER BY ja.created_at DESC
+                LIMIT 1
+            ) AS uploaded_cv,
+            CONCAT(
+                INITCAP(LOWER(d.track_level)), 
+                ' ', 
+                INITCAP(LOWER(d.current_track))
+            ) AS track_title
+        FROM developers d
+        WHERE d.id = $1
+    `;
+    const { rows } = await pool.query(query, [developerId]);
+
+    if (rows.length === 0) {
+        throw new Error("Developer not found");
+    }
+
+    const dev = rows[0];
+
+    return {
+        id: dev.id,
+        firstName: dev.first_name,
+        lastName: dev.last_name,
+        email: dev.email,
+        bio: dev.bio,
+        address: dev.address,
+        city: dev.city,
+        country: dev.country,
+        brief_bio: dev.brief_bio,
+        currentTrack: dev.current_track,
+        trackLevel: dev.track_level,
+        trackTitle: dev.track_title,
+        uploadedCv: dev.uploaded_cv,
+        uploadedCvLink: dev.uploaded_cv
+            ? `${BASE_URL.replace(/\/+$/, "")}/${dev.uploaded_cv.replace(
+                  /^\/+/,
+                  ""
+              )}`
+            : null,
+        profilePicture: dev.profile_picture
+            ? `${BASE_URL.replace(
+                  /\/+$/,
+                  ""
+              )}/uploads/profile_pictures/${path.basename(dev.profile_picture)}`
+            : null,
+    };
+}
+
 // ✅ Updated: Get recent developers who applied to company's jobs
 async function getRecentAppliedDevelopers(companyId) {
     const query = `
@@ -112,13 +179,41 @@ async function getDeveloperCv(developerId) {
         throw new Error("No job applications found for this developer");
     }
 
+    const uploadedCv = rows[0].uploaded_cv;
+
     return {
-        uploaded_cv: rows[0].uploaded_cv,
-        uploaded_cv_link: rows[0].uploaded_cv
-            ? `${BASE_URL}/${rows[0].uploaded_cv}`
+        uploaded_cv: uploadedCv,
+        uploaded_cv_link: uploadedCv
+            ? `${BASE_URL.replace(/\/+$/, "")}/${uploadedCv.replace(
+                  /^\/+/,
+                  ""
+              )}`
             : null,
     };
 }
+
+// // ✅ Updated: Get uploaded and/or generated CV of a developer
+// async function getDeveloperCv(developerId) {
+//     const query = `
+//         SELECT uploaded_cv
+//         FROM job_applications
+//         WHERE developer_id = $1
+//         ORDER BY created_at DESC
+//         LIMIT 1
+//     `;
+//     const { rows } = await pool.query(query, [developerId]);
+
+//     if (rows.length === 0) {
+//         throw new Error("No job applications found for this developer");
+//     }
+
+//     return {
+//         uploaded_cv: rows[0].uploaded_cv,
+//         uploaded_cv_link: rows[0].uploaded_cv
+//             ? `${BASE_URL}/${rows[0].uploaded_cv}`
+//             : null,
+//     };
+// }
 
 // ✅ Updated: Get full job application with developer + job
 async function getJobApplicationDetails(applicationId) {
@@ -196,6 +291,7 @@ module.exports = {
     getRecentAppliedDevelopers,
     getDeveloperCv,
     getJobApplicationDetails,
+    getDeveloperById,
 };
 
 // const { pool } = require("../../config/db"); // or your actual DB client

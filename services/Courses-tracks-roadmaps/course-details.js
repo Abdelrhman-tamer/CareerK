@@ -84,14 +84,30 @@ const getCourseOverview = async (courseId) => {
 };
 
 // 3. Contents
-const getCourseContents = async (courseId) => {
+const getCourseContents = async (courseId, developerId) => {
     const contentRes = await pool.query(
         `SELECT * FROM course_contents WHERE course_id = $1 ORDER BY "order" ASC`,
         [courseId]
     );
 
+    const lessonRows = contentRes.rows;
+
+    const bookmarksRes = await pool.query(
+        `SELECT lesson_id FROM lesson_bookmarks
+         WHERE developer_id = $1 AND course_id = $2`,
+        [developerId, courseId]
+    );
+
+    const bookmarkedLessonIds = new Set(
+        bookmarksRes.rows.map((row) => String(row.lesson_id))
+    );
+
     const contents = await Promise.all(
-        contentRes.rows.map(async (row) => {
+        lessonRows.map(async (row) => {
+            const isBookmarked = [...bookmarkedLessonIds].some(
+                (id) => String(id) === String(row.id)
+            );
+
             if (row.type === "video") {
                 return {
                     id: row.id,
@@ -100,7 +116,8 @@ const getCourseContents = async (courseId) => {
                     video_time: `${row.video_time_minutes}min`,
                     video_url: row.video_url,
                     embed_url:
-                        row.embed_url || extractYouTubeEmbedUrl(row.video_url), // ✅ fallback
+                        row.embed_url || extractYouTubeEmbedUrl(row.video_url),
+                    isBookmarked,
                 };
             } else if (row.type === "quiz") {
                 const quizRes = await pool.query(
@@ -115,6 +132,7 @@ const getCourseContents = async (courseId) => {
                     type: "quiz",
                     title: row.title,
                     questions: quizRes.rows,
+                    isBookmarked,
                 };
             }
         })
@@ -123,82 +141,6 @@ const getCourseContents = async (courseId) => {
     return contents;
 };
 
-// function getFullUrl(relativePath) {
-//     return relativePath ? `${BASE_URL}/${relativePath}` : null;
-// }
-
-// // 1. Header
-// const getCourseHeader = async (courseId) => {
-//     const courseRes = await pool.query(
-//         `SELECT name, image_url FROM courses WHERE id = $1`,
-//         [courseId]
-//     );
-
-//     const ratingRes = await pool.query(
-//         `SELECT ROUND(AVG(rating)::numeric, 1) as average_rating
-//          FROM course_reviews
-//          WHERE course_id = $1`,
-//         [courseId]
-//     );
-
-//     const videoCountRes = await pool.query(
-//         `SELECT COUNT(*) as video_lessons
-//          FROM course_contents
-//          WHERE course_id = $1 AND type = 'video'`,
-//         [courseId]
-//     );
-
-//     const firstVideoRes = await pool.query(
-//         `SELECT video_url, embed_url
-//          FROM course_contents
-//          WHERE course_id = $1
-//          AND type = 'video'
-//          AND video_url IS NOT NULL
-//          ORDER BY "order" ASC
-//          LIMIT 1`,
-//         [courseId]
-//     );
-
-//     return {
-//         name: courseRes.rows[0]?.name || "",
-//         imageUrl: getFullUrl(courseRes.rows[0]?.image_url),
-//         averageRating: parseFloat(ratingRes.rows[0]?.average_rating) || 0,
-//         videoLessons: parseInt(videoCountRes.rows[0]?.video_lessons) || 0,
-//         previewVideoUrl: firstVideoRes.rows[0]?.video_url || null,
-//         previewEmbedUrl: firstVideoRes.rows[0]?.embed_url || null, // ✅ added
-//     };
-// };
-
-// // 2. Overview
-// const getCourseOverview = async (courseId) => {
-//     const courseRes = await pool.query(
-//         `SELECT description, difficulty, has_certificate, learning_objectives
-//          FROM courses
-//          WHERE id = $1`,
-//         [courseId]
-//     );
-
-//     const timeRes = await pool.query(
-//         `SELECT COALESCE(SUM(video_time_minutes), 0) as total_minutes
-//          FROM course_contents
-//          WHERE course_id = $1 AND type = 'video'`,
-//         [courseId]
-//     );
-
-//     const totalMinutes = parseInt(timeRes.rows[0].total_minutes);
-//     const hours = Math.floor(totalMinutes / 60);
-//     const minutes = totalMinutes % 60;
-
-//     return {
-//         totalVideoTime: `${hours}h ${minutes}min`,
-//         hasCertificate: courseRes.rows[0]?.has_certificate || false,
-//         difficulty: courseRes.rows[0]?.difficulty || "",
-//         description: courseRes.rows[0]?.description || "",
-//         learningObjectives: courseRes.rows[0]?.learning_objectives || [],
-//     };
-// };
-
-// // 3. Contents
 // const getCourseContents = async (courseId) => {
 //     const contentRes = await pool.query(
 //         `SELECT * FROM course_contents WHERE course_id = $1 ORDER BY "order" ASC`,
@@ -214,7 +156,8 @@ const getCourseContents = async (courseId) => {
 //                     title: row.title,
 //                     video_time: `${row.video_time_minutes}min`,
 //                     video_url: row.video_url,
-//                     embed_url: row.embed_url || null, // ✅ added
+//                     embed_url:
+//                         row.embed_url || extractYouTubeEmbedUrl(row.video_url), // ✅ fallback
 //                 };
 //             } else if (row.type === "quiz") {
 //                 const quizRes = await pool.query(

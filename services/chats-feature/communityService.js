@@ -71,6 +71,20 @@ exports.fetchGroupsByInterestTag = async (tag) => {
     }));
 };
 
+// ✅ Get distinct interest tags
+exports.getAllInterestTags = async () => {
+    const result = await pool.query(`
+        SELECT DISTINCT interest_tag
+        FROM community_groups
+        WHERE deleted_at IS NULL
+        ORDER BY interest_tag;
+    `);
+
+    const tags = result.rows.map((row) => row.interest_tag);
+
+    return { tag: tags };
+};
+
 // ✅ Search community groups
 exports.searchCommunityGroups = async (keyword) => {
     const result = await pool.query(
@@ -95,6 +109,31 @@ exports.searchCommunityGroups = async (keyword) => {
 };
 
 // ✅ Join community group
+// // 🔄 Toggle join/leave community group
+// exports.toggleCommunityMembership = async (chatRoomId, userId, userRole) => {
+//     const existing = await pool.query(
+//         `SELECT id FROM chat_participants WHERE chat_room_id = $1 AND user_id = $2`,
+//         [chatRoomId, userId]
+//     );
+
+//     if (existing.rows.length > 0) {
+//         // Already joined → Leave
+//         await pool.query(
+//             `DELETE FROM chat_participants WHERE chat_room_id = $1 AND user_id = $2`,
+//             [chatRoomId, userId]
+//         );
+//         return { status: "left" };
+//     } else {
+//         // Not joined → Join
+//         await pool.query(
+//             `INSERT INTO chat_participants (chat_room_id, user_id, user_role, updated_at)
+//              VALUES ($1, $2, $3, CURRENT_TIMESTAMP)`,
+//             [chatRoomId, userId, userRole]
+//         );
+//         return { status: "joined" };
+//     }
+// };
+
 exports.joinCommunity = async (chatRoomId, userId, userRole) => {
     const existing = await pool.query(
         `SELECT id FROM chat_participants WHERE chat_room_id = $1 AND user_id = $2`,
@@ -168,7 +207,7 @@ exports.getUserGroups = async (userId) => {
 };
 
 // ✅ Get messages for a group (paginated)
-exports.getGroupMessages = async (chatRoomId, page = 1, limit = 20) => {
+exports.getGroupMessages = async (chatRoomId, page = 1, limit = 5000) => {
     const offset = (page - 1) * limit;
 
     const result = await pool.query(
